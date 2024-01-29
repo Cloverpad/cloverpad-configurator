@@ -7,16 +7,20 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
+    "generate-protobuf": "pbjs -t static-module -w es6 --es6 --path src/protocol -o src/protocol.js src/protocol/commands.proto && pbts -o src/protocol.d.ts src/protocol.js",
     "generate-pwa-assets": "pwa-assets-generator --preset minimal-2023 public/mmj-icon.svg"
   },
   "dependencies": {
     "bootstrap": "^5.3.2",
     "bootstrap-icons": "^1.11.3",
+    "protobufjs": "^7.2.6",
     "solid-js": "^1.8.12"
   },
   "devDependencies": {
+    "@types/w3c-web-serial": "^1.0.6",
     "@vite-pwa/assets-generator": "^0.2.3",
     "@vitejs/plugin-basic-ssl": "^1.1.0",
+    "protobufjs-cli": "^1.1.2",
     "typescript": "^5.3.3",
     "vite": "^5.0.12",
     "vite-plugin-pwa": "^0.17.5",
