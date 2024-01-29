@@ -27,6 +27,22 @@ function App() {
     return combined;
   };
 
+  const readInto = async (reader: ReadableStreamBYOBReader, buffer: ArrayBuffer): Promise<ArrayBuffer> => {
+    let offset = 0;
+
+    while (offset < buffer.byteLength) {
+      const { value, done } = await reader.read(new Uint8Array(buffer, offset));
+      if (done) {
+        break;
+      }
+
+      buffer = value.buffer;
+      offset += value.byteLength;
+    }
+
+    return buffer;
+  }
+
   const requestFirmwareVersion = async () => {
     if (!navigator.serial) {
       alert("Web Serial is not supported");
@@ -75,69 +91,29 @@ function App() {
       // We have to release the lock afterwards
       writer.releaseLock();
 
-      // Retrieve the reader for the serial port
-      const reader = selectedSerialPort.readable?.getReader();
-      if (!reader) {
-        console.log("Unable to retrieve reader");
+      // Read the response length (unsigned 32-bit LE integer)
+      if (!selectedSerialPort.readable) {
         return;
       }
 
-      // TODO: I can't read the values once, since it may be incomplete
-      // But I also can't read indefinitely, since 'done' is only set on a break condition
-      // From the Web Serial spec, it looks like I'm meant to have a pre-determined way to signal end of transmission
-      //
-      // One idea is to send the data as hexadecimal strings:
-      // - Print data
-      // - Print terminator character - e.g. end of line, end of transmission
-      //
-      // Then on the reader side:
-      // - Read the values until the terminator character appears
-      // - Parse the hexadecimal string into a byte array
-      // - Decode the string
+      let responseLengthBuffer = new ArrayBuffer(4);
+      const reader = selectedSerialPort.readable.getReader({ mode: "byob" });
+      responseLengthBuffer = await readInto(reader, responseLengthBuffer);
 
-      // Read the next chunk of data
-      let complete = false;
-      let partialBuffers: Uint8Array[] = [];
+      // Convert this into an unsigned 32-bit integer
+      const responseLengthView = new Uint32Array(responseLengthBuffer);
+      const responseLength = responseLengthView.at(0) ?? 0;
+      console.log(responseLength);
 
-      while (true) {
-        const { value, done } = await reader.read();
-        console.log(value);
-        console.log(done);
+      // Read the response
+      let responseDataBuffer = new ArrayBuffer(responseLength);
+      responseDataBuffer = await readInto(reader, responseDataBuffer);
+      reader.releaseLock();
 
-        if (value) {
-          partialBuffers.push(value);
-
-          if (value.includes(0x03, value.byteLength - 2) && value.includes(0x04, value.byteLength - 1)) {
-            reader.releaseLock();
-            break;
-          }
-        }
-
-        if (done) {
-          // Need to release the lock when we're finished
-          reader.releaseLock();
-          break;
-        }
-      }
-
-      let value = combineArrays(...partialBuffers);
-
-      if (value) {
-        // The data is after the unsigned 32-bit LE byte length
-        const dataBuffer = value.slice(4);
-        console.log(dataBuffer);
-
-        // Attempt to decode it
-        const response = cloverpad.Response.decode(dataBuffer);
-        console.log(response);
-        console.log(response.code);
-
-        if (response.firmwareVersion?.version) {
-          alert(response.firmwareVersion.version);
-        } else {
-          alert("Unable to retrieve firmware version");
-        }
-      }
+      // Create a byte array view and parse the response
+      const responseDataView = new Uint8Array(responseDataBuffer);
+      const response = cloverpad.Response.decode(responseDataView, responseLength);
+      console.log(response);
     } catch (error) {
       console.log(error);
     } finally {
