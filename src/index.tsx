@@ -1,9 +1,11 @@
 /* @refresh reload */
-import { render } from 'solid-js/web'
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap-icons/font/bootstrap-icons.min.css";
 
-import './index.css'
-import App from './App'
+import "bootstrap";
 
-const root = document.getElementById('root')
+import { render } from "solid-js/web";
 
-render(() => <App />, root!)
+import App from "./App";
+
+render(() => <App />, document.getElementById("root")!);
