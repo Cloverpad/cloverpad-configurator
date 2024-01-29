@@ -1,6 +1,7 @@
-import { defineConfig } from 'vite'
-import solid from 'vite-plugin-solid'
+import basicSsl from "@vitejs/plugin-basic-ssl";
+import { defineConfig } from "vite";
+import solid from "vite-plugin-solid";
 
 export default defineConfig({
-  plugins: [solid()],
-})
+  plugins: [basicSsl(), solid()],
+});
