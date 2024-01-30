@@ -1,28 +1,52 @@
+# Cloverpad - Web Configurator
+
+This repository contains a web configurator application for the [Cloverpad](https://github.com/Cloverpad), a 3-key keypad for osu! themed after [MORE MORE JUMP!](https://www.sekaipedia.org/wiki/MORE_MORE_JUMP!) from Project Sekai.
+
 ## Usage
 
+**WIP**
+
+## Setting Up Development Environment
+
+The web configurator is a NodeJS project. Make sure you have the following things installed:
+
+- NodeJS LTS (tested on v20.11.0)
+- [A browser that supports Web Serial](https://caniuse.com/web-serial)
+  - e.g. Google Chrome
+
+Clone this repository including submodules:
+
 ```bash
-$ npm install # or pnpm install or yarn install
+git clone --recurse-submodules https://github.com/Cloverpad/cloverpad-configurator-web.git
 ```
 
-### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
+Install Node dependencies:
 
-## Available Scripts
+```bash
+npm install
+```
 
-In the project directory, you can run:
+Then use one of the following scripts to manage the app:
 
-### `npm run dev`
+```bash
+# Run development version of the app
+# This will host the app at https://localhost:5173
+npm run dev
 
-Runs the app in the development mode.<br>
-Open [http://localhost:5173](http://localhost:5173) to view it in the browser.
+# Build the production version of the app
+npm run build
 
-### `npm run build`
+# Preview the production version of the app (requires building first)
+# This will host the app at https://localhost:4173
+npm run preview
+```
 
-Builds the app for production to the `dist` folder.<br>
-It correctly bundles Solid in production mode and optimizes the build for the best performance.
+There are also a few additional scripts to aid with development:
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+```bash
+# Generate code from Protobuf Definitions
+npm run generate-protobuf
 
-## Deployment
-
-Learn more about deploying your application with the [documentations](https://vitejs.dev/guide/static-deploy.html)
+# Generate icons for PWA assets
+npm run generate-pwa-assets
+```
