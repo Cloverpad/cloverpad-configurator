@@ -51,8 +51,8 @@ export class Keypad {
   async sendCommand(
     command: cloverpad.Command
   ): Promise<cloverpad.Response | null> {
-    let writer: WritableStreamDefaultWriter<Uint8Array> | null = null;
     let reader: ReadableStreamBYOBReader | null = null;
+    let writer: WritableStreamDefaultWriter<Uint8Array> | null = null;
 
     try {
       // Open the serial port if necessary
@@ -94,15 +94,17 @@ export class Keypad {
       const responseDataByteView = new Uint8Array(responseDataBuffer);
       return cloverpad.Response.decode(responseDataByteView, responseLength);
     } finally {
-      if (writer) {
-        writer.releaseLock();
-      }
-
       if (reader) {
         reader.releaseLock();
       }
 
-      this.port.close();
+      if (writer) {
+        writer.releaseLock();
+      }
+
+      if (reader || writer) {
+        this.port.close();
+      }
     }
   }
 }
